@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: karsajobs-service
+spec:
+  # Expose the backend on a stable NodePort so the frontend can call it.
+  type: NodePort
+  selector:
+    app: karsajobs
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+      nodePort: 30080

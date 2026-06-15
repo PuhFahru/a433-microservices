@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mongo-config
+data:
+  # Store the MongoDB configuration file required by the project tips.
+  mongo.conf: |
+    storage:
+      dbPath: /data/db

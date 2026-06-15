@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongo
+spec:
+  # Bind the StatefulSet to the stable MongoDB service name.
+  serviceName: mongo-service
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongo
+  template:
+    metadata:
+      labels:
+        app: mongo
+    spec:
+      containers:
+        - name: mongo
+          # Use the official MongoDB image for the database layer.
+          image: mongo:4.4
+          # Start MongoDB with the configuration file mounted from the ConfigMap.
+          args: ["--config", "/config/mongo.conf"]
+          ports:
+            - containerPort: 27017
+          env:
+            # Read the MongoDB root username from the mounted secret file.
+            - name: MONGO_INITDB_ROOT_USERNAME_FILE
+              value: /etc/mongo-credentials/MONGO_ROOT_USERNAME
+            # Read the MongoDB root password from the mounted secret file.
+            - name: MONGO_INITDB_ROOT_PASSWORD_FILE
+              value: /etc/mongo-credentials/MONGO_ROOT_PASSWORD
+          volumeMounts:
+            # Persist database files across pod restarts.
+            - name: mongo-persistent-storage
+              mountPath: /data/db
+            # Mount the MongoDB configuration file from the ConfigMap.
+            - name: mongo-config-volume
+              mountPath: /config
+            # Mount secret files used by MongoDB initialization.
+            - name: mongo-credentials
+              mountPath: /etc/mongo-credentials
+              readOnly: true
+      volumes:
+        - name: mongo-persistent-storage
+          persistentVolumeClaim:
+            claimName: mongo-pvc
+        - name: mongo-config-volume
+          configMap:
+            name: mongo-config
+        - name: mongo-credentials
+          secret:
+            secretName: mongo-secret

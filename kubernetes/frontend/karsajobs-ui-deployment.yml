@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: karsajobs-ui
+spec:
+  # Run a single frontend replica for the local minikube environment.
+  replicas: 1
+  selector:
+    matchLabels:
+      app: karsajobs-ui
+  template:
+    metadata:
+      labels:
+        app: karsajobs-ui
+    spec:
+      containers:
+        - name: karsajobs-ui
+          # Pull the frontend image from Docker Hub.
+          image: fahp19/karsajobs-ui:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000

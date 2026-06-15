@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: karsajobs
+spec:
+  # Run a single backend replica for this local training environment.
+  replicas: 1
+  selector:
+    matchLabels:
+      app: karsajobs
+  template:
+    metadata:
+      labels:
+        app: karsajobs
+    spec:
+      containers:
+        - name: karsajobs
+          # Pull the backend image from Docker Hub.
+          image: fahp19/karsajobs:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            # Run the application on the port expected by the Dockerfile and service.
+            - name: APP_PORT
+              value: "8080"
+            # Point the backend to the in-cluster MongoDB service.
+            - name: MONGO_HOST
+              value: "mongo-service"
+            # Load the MongoDB username from the Kubernetes Secret.
+            - name: MONGO_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secret
+                  key: MONGO_ROOT_USERNAME
+            # Load the MongoDB password from the Kubernetes Secret.
+            - name: MONGO_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secret
+                  key: MONGO_ROOT_PASSWORD
